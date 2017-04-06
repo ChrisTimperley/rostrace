@@ -151,7 +151,12 @@ def initialize_tables(bag, service_related, config='', important_topics=[]):
     return msg_table, program_point_table
 
 
+# What is the output of this function?
+#
 # TODO: the "topics" argument isn't used
+# TODO: what are the contents of the message table?
+# TODO: why do we accept "toPublish" and return it? Should we not create a new
+#       buffer and return that?
 def read_bag_file(topics, program_point_table, msg_table, bag_file, headers,
                   toPublish):
     bag = rosbag.Bag(bag_file)
