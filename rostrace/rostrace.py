@@ -151,6 +151,7 @@ def initialize_tables(bag, service_related, config='', important_topics=[]):
     return msg_table, program_point_table
 
 
+# TODO: the "topics" argument isn't used
 def read_bag_file(topics, program_point_table, msg_table, bag_file, headers,
                   toPublish):
     bag = rosbag.Bag(bag_file)
@@ -242,9 +243,11 @@ def main():
     service_related = []
 
     # Read the service complement file, if one was provided
+    # TODO: what is the format of these service complement files?
     if service_complement != '-i':
         service_related = read_complementary_service_file(service_complement)
     to_record = {}
+
     # TODO: setting up global variables
     topics = ['/rec/arch_pub', '/rec/arch_sub']
     for topic in topics:
