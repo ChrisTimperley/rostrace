@@ -43,7 +43,7 @@ def error(msg, code=1):
     print("ERROR: {}".format(msg))
     exit(code)
 
-
+# TODO: refactor
 def parse_msg_file(filename, topic):
     variables = []
     with open(filename, 'r') as f:
@@ -189,6 +189,8 @@ def write_declaration(topic, variables, decl_file):
         decl_file.write('  rep-type ' + typ + '\n')
 
 
+# TODO: Why are we piping to a temporary file? We can just use Popen to get the
+# std. out of a command
 def get_msg_header(msg_type):
     err = os.system('rosmsg show ' + msg_type + ' | unexpand -t 2 > rosmsg.txt')
     if err:
@@ -196,12 +198,14 @@ def get_msg_header(msg_type):
     return 'rosmsg.txt'
 
 
+# TODO: what data are we writing?
 def write_file(trace_file, to_record):
     for topic in to_record.keys():
         for point in to_record[topic]:
             trace_file.write(point)
 
 
+# TODO: what is a complementary service file? Explain.
 def read_complementary_service_file(service_complement):
     service_related = []
     with open(service_complement, "r") as complement:
