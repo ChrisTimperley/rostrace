@@ -166,7 +166,47 @@ def convert_bag_to_program_points(filename):
         # For now, this is the set of topics that we're interested in
         # TODO: filter topics according to blacklist / whitelist
         all_topics = set(m.topic for m in bag)
-        topics = all_topics
+        # topics = all_topics
+        interested_topics = set([
+            "/camera/depth/camera_info",
+            "/camera/depth/image_raw",
+            "/camera/depth/points",
+            "/camera/parameter_descriptions",
+            "/camera/parameter_updates",
+            "/camera/rgb/camera_info",
+            "/clock",
+            "/cmd_vel_mux/active",
+            "/cmd_vel_mux/input/navi",
+            "/cmd_vel_mux/input/safety_controller",
+            "/cmd_vel_mux/input/switch",
+            "/cmd_vel_mux/input/teleop",
+            "/cmd_vel_mux/parameter_descriptions",
+            "/cmd_vel_mux/parameter_updates",
+            "/depthimage_to_laserscan/parameter_descriptions",
+            "/depthimage_to_laserscan/parameter_updates",
+            "/gazebo/link_states",
+            "/gazebo/model_states",
+            "/gazebo/parameter_descriptions",
+            "/gazebo/parameter_updates",
+            "/gazebo/set_link_state",
+            "/gazebo/set_model_state",
+            "/joint_states",
+            "/laserscan_nodelet_manager/bond",
+            "/mobile_base/commands/motor_power",
+            "/mobile_base/commands/reset_odometry",
+            "/mobile_base/commands/velocity",
+            "/mobile_base/events/bumper",
+            "/mobile_base/events/cliff",
+            "/mobile_base/sensors/bumper_pointcloud",
+            "/mobile_base/sensors/core",
+            "/mobile_base/sensors/imu_data",
+            "/mobile_base_nodelet_manager/bond",
+            "/odom",
+            "/scan",
+            "/tf",
+            "/tf_static"
+        ])
+        topics = all_topics.intersection(interested_topics)
 
         # Fetch the message formats used by each of those topics
         topic_formats = {t: get_message_format_for_topic(t) for t in topics}
@@ -180,8 +220,7 @@ def convert_bag_to_program_points(filename):
         # pp(var_vals)
 
 def main(): 
-    pp(get_message_format("sensor_msgs/CameraInfo"))
-    # convert_bag_to_program_points(sys.argv[1])
+    convert_bag_to_program_points(sys.argv[1])
 
 if __name__ == "__main__":
     main()
