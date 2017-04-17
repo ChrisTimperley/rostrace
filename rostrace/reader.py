@@ -16,6 +16,18 @@ from pprint import pprint as pp
 def write_to_dtrace(data):
     pass
 
+# Helper function for recursively finding the value of an inner dictionary
+# entry
+def fetch_at_location(dct, loc):
+    key = loc[0]
+    val = dct[key]
+    loc = loc[1:]
+
+    if loc == []:
+        return nxt_val
+    else:
+        return fetch_at_location(val, loc)
+
 """
 Extracts all variable values from a given message into a dictionary of the
 form {name: value}, where names are flattened into a one-dimensional form
@@ -36,8 +48,15 @@ def extract_vars_from_message(topic, msg, msg_format):
         msg = yaml.load(msg)
     except yaml.scanner.ScannerError:
         return None
-    
-    return {}
+
+    # Extract the message contents into a flat dictionary
+    contents = {}
+    for param in msg_format:
+        location = param.split('.')
+        param = '{}.{}'.format(topic, param)
+        contents[param] = fetch_at_location(msg, location)
+
+    return contents
 
 # Returns details of the message format for a particular topic. See
 # get_message_format for details.
