@@ -48,7 +48,10 @@ def extract_vars_from_message(topic, msg):
     
     return {}
 
-# def get_message_format(msg):
+# Given the name of a message type, this method returns a mapping between
+# (flattened) field names and their corresponding types.
+def get_message_fields(msg):
+    return {}
 
 def convert_bag_to_program_points(filename):
     bag = rosbag.Bag(filename)
