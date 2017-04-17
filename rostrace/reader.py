@@ -7,6 +7,7 @@ import sys
 import rosbag
 import yaml
 
+from subprocess import Popen, PIPE
 from pprint import pprint as pp
 
 # Flattens a set of nested dictionaries into a single dictionary
@@ -14,8 +15,6 @@ from pprint import pprint as pp
 # Writes to a dtrace file
 def write_to_dtrace(data):
     pass
-
-def extract_declaration_for_
 
 # Flattens the contents of a (decoded) message into a dictionary from flattened
 # to values.
@@ -49,9 +48,42 @@ def extract_vars_from_message(topic, msg):
     return {}
 
 # Given the name of a message type, this method returns a mapping between
-# (flattened) field names and their corresponding types.
+# (flattened) field names and their corresponding types. Any properties which
+# cannot be recorded by rostrace (i.e. non-primitive properties) are omitted.
 def get_message_fields(msg):
-    return {}
+    fields = {}
+    cmd = ["rosmsg", "show", msg]
+    out = ""
+
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    out, err = p.communicate()
+
+    if p.returncode != 0:
+        msg = 'Unexpected return code from `rosmsg show {}`: {} ({})'.format(msg, p.returncode, err)
+        raise RuntimeError(msg)
+
+    # Extract each of the fields from the std. out
+    prefix = []
+    for line in out.splitlines():
+        line = line.rstrip()
+
+        # Skip any empty lines
+        if line.lstrip() == '':
+            continue
+
+        # Determine the prefix for the property
+        depth = (len(line) - len(line.lstrip())) / 2
+        prefix = prefix[:depth]
+
+        # Get the fully qualified name and type for this property
+        (typ, suffix) = line.lstrip().split(' ')
+        name = '.'.join(prefix + [suffix])
+        fields[name] = typ
+
+        # Add to the prefix stack
+        prefix.append(suffix) 
+
+    return fields
 
 def convert_bag_to_program_points(filename):
     bag = rosbag.Bag(filename)
@@ -63,7 +95,8 @@ def convert_bag_to_program_points(filename):
         # pp(var_vals)
 
 def main(): 
-    convert_bag_to_program_points(sys.argv[1])
+    pp(get_message_fields("sensor_msgs/CameraInfo"))
+    # convert_bag_to_program_points(sys.argv[1])
 
 if __name__ == "__main__":
     main()
