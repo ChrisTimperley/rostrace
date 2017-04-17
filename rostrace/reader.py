@@ -55,9 +55,13 @@ def get_message_format_for_topic(topic):
     msg_format = out.strip()
     return get_message_format(msg_format)
 
-# Given the name of a message type, this method returns a mapping between
-# (flattened) field names and their corresponding types. Any properties which
-# cannot be recorded by rostrace (i.e. non-primitive properties) are omitted.
+"""
+For a given message type, this method returns a mapping between (flattened)
+field names and their corresponding types. Any properties which cannot be
+recorded by rostrace (i.e. non-primitive properties) are omitted.
+
+@param  msg the name of the message type
+"""
 def get_message_format(msg):
     fields = {}
     cmd = ["rosmsg", "show", msg]
