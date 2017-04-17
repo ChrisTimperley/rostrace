@@ -6,11 +6,38 @@
 import sys
 import rosbag
 import yaml
+import re
 
 from subprocess import Popen, PIPE
 from pprint import pprint as pp
 
-# Flattens a set of nested dictionaries into a single dictionary
+# A mapping from ROS types to Daikon types
+TYPE_MAP = {
+    'bool': 'boolean',
+    'int8': 'int',
+    'uint8': 'int',
+    'int16': 'int',
+    'uint16': 'int',
+    'int32': 'int',
+    'uint32': 'int',
+    'int64': 'int',
+    'uint64': 'int',
+    'float32': 'double',
+    'float64': 'double',
+    'string': 'java.lang.String',
+    'bool[]': 'boolean[]',
+    'int8[]': 'int[]',
+    'uint8[]': 'int[]',
+    'int16[]': 'int[]',
+    'uint16[]': 'int[]',
+    'int32[]': 'int[]',
+    'uint32[]': 'int[]',
+    'int64[]': 'int[]',
+    'uint64[]': 'int[]',
+    'float32[]': 'double[]',
+    'float64[]': 'double[]',
+    'string[]': 'java.lang.String[]'
+}
 
 # Writes to a dtrace file
 def write_to_dtrace(data):
@@ -82,6 +109,8 @@ For a given message type, this method returns a mapping between (flattened)
 field names and their corresponding types. Any properties which cannot be
 recorded by rostrace (i.e. non-primitive properties) are omitted.
 
+@TODO   map types to Daikon primitive types, excluding any incompatible types
+
 @param  msg the name of the message type
 """
 def get_message_format(msg):
@@ -105,17 +134,28 @@ def get_message_format(msg):
         if line.lstrip() == '':
             continue
 
-        # Determine the prefix for the property
+        # Determine the prefix for the field
         depth = (len(line) - len(line.lstrip())) / 2
         prefix = prefix[:depth]
 
-        # Get the fully qualified name and type for this property
+        # Get the name and type for this field
         (typ, suffix) = line.lstrip().split(' ')
+
+        # Generate the fully qualified name for the field and record it
         name = '.'.join(prefix + [suffix])
         fields[name] = typ
 
         # Add to the prefix stack
-        prefix.append(suffix) 
+        prefix.append(suffix)
+
+    # Map each ROS type to a Daikon type
+    # If no such mapping exists for a given field, drop that field
+    fields_mapped = {}
+    for (field, typ) in fields.items():
+        typ = re.sub(r"\[\d+\]", '[]', typ)
+        if typ in TYPE_MAP:
+            fields_mapped[field] = TYPE_MAP[typ]
+    fields = fields_mapped
 
     return fields
 
@@ -140,7 +180,8 @@ def convert_bag_to_program_points(filename):
         # pp(var_vals)
 
 def main(): 
-    convert_bag_to_program_points(sys.argv[1])
+    pp(get_message_format("sensor_msgs/CameraInfo"))
+    # convert_bag_to_program_points(sys.argv[1])
 
 if __name__ == "__main__":
     main()
