@@ -47,10 +47,26 @@ def extract_vars_from_message(topic, msg):
     
     return {}
 
+# Returns details of the message format for a particular topic. See
+# get_message_format for details.
+def get_message_format_for_topic(topic):
+
+    # Get the name of the message format used by the topic
+    cmd = ["rosmsg", "type", topic]
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    out, err = p.communicate()
+
+    if p.returncode != 0:
+        msg = 'Failed to get message format for topic ({}): {}'.format(topic, err)
+        raise RuntimeError(msg)
+
+    msg_format = out.strip()
+    return get_message_format(msg_format)
+
 # Given the name of a message type, this method returns a mapping between
 # (flattened) field names and their corresponding types. Any properties which
 # cannot be recorded by rostrace (i.e. non-primitive properties) are omitted.
-def get_message_fields(msg):
+def get_message_format(msg):
     fields = {}
     cmd = ["rosmsg", "show", msg]
     out = ""
