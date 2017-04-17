@@ -16,9 +16,9 @@ from pprint import pprint as pp
 def write_to_dtrace(data):
     pass
 
-# Extracts all variable values from a given message
-# Returns a dictionary the form {name: value}, where names are flattened
-# into a one-dimensional form (e.g. pose.position.x).
+# Extracts all variable values from a given message into a dictionary of the
+# form {name: value}, where names are flattened into a one-dimensional form
+# (e.g. pose.position.x).
 #
 # Returns None if there was an error whilst reading the message.
 def extract_variable_values_from_message(topic, msg):
@@ -30,6 +30,8 @@ def extract_variable_values_from_message(topic, msg):
         msg = yaml.load(msg)
     except yaml.scanner.ScannerError:
         return None
+
+    # Flatten the YAML file
 
     return {}
 
