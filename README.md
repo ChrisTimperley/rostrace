@@ -19,3 +19,7 @@ Based on the approach described by Hengle Jiang in his Masters thesis entitled
   wouldn't be too hard to overcome this limitation by utilising certain
   Python-based ROS utilities for dynamically remapping topics and launching
   nodes.
+
+## Requirements
+
+* PyYAML
