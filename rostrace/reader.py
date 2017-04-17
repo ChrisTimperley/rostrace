@@ -16,26 +16,18 @@ from pprint import pprint as pp
 def write_to_dtrace(data):
     pass
 
-# Flattens the contents of a (decoded) message into a dictionary from flattened
-# to values.
-#def flatten_message_content(msg, prefixes=[]):
-#    if not isinstance(msg, dict):
-#        return {}
-#    
-#    out = {}
-#    for (name, val) in msg.items():
-#        if isinstance(val, dict):
-#            out += flatten_message_content(msg, prefixes + [name])
-#        elif isinstance(val, list):
-#
-#    return out
+"""
+Extracts all variable values from a given message into a dictionary of the
+form {name: value}, where names are flattened into a one-dimensional form
+(e.g. pose.position.x).
 
-# Extracts all variable values from a given message into a dictionary of the
-# form {name: value}, where names are flattened into a one-dimensional form
-# (e.g. pose.position.x).
-#
-# Returns None if there was an error whilst reading the message.
-def extract_vars_from_message(topic, msg):
+Returns None if there was an error whilst reading the message.
+
+@param  topic       the name of the topic the message was published to
+@param  msg         the contents of the message, as provided by the ROS Bag API
+@param  msg_format  the message format used by this topic
+"""
+def extract_vars_from_message(topic, msg, msg_format):
     msg = str(msg)
 
     # A bug in the YAML output formatting of certain ROS messages can cause
