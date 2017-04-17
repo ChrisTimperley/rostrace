@@ -58,12 +58,15 @@ def extract_vars_from_message(topic, msg, msg_format):
 
     return contents
 
-# Returns details of the message format for a particular topic. See
-# get_message_format for details.
+"""
+Returns details of the message format used by a particular topic
+
+@see    get_message_format
+"""
 def get_message_format_for_topic(topic):
 
     # Get the name of the message format used by the topic
-    cmd = ["rosmsg", "type", topic]
+    cmd = ["rostopic", "type", topic]
     p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     out, err = p.communicate()
 
@@ -117,17 +120,27 @@ def get_message_format(msg):
     return fields
 
 def convert_bag_to_program_points(filename):
-    bag = rosbag.Bag(filename)
-    for entry in bag:
-        var_vals = extract_vars_from_message(entry.topic, entry.message)
+    with rosbag.Bag(filename) as bag:
 
-        sys.exit(0)
+        # Extract the set of topics represented within the bag
+        # For now, this is the set of topics that we're interested in
+        # TODO: filter topics according to blacklist / whitelist
+        all_topics = set(m.topic for m in bag)
+        topics = all_topics
+
+        # Fetch the message formats used by each of those topics
+        topic_formats = {t: get_message_format_for_topic(t) for t in topics}
+        pp(topic_formats)
+
+        #for entry in bag:
+        #    var_vals = extract_vars_from_message(entry.topic, entry.message)
+        #
+        #    sys.exit(0)
 
         # pp(var_vals)
 
 def main(): 
-    pp(get_message_fields("sensor_msgs/CameraInfo"))
-    # convert_bag_to_program_points(sys.argv[1])
+    convert_bag_to_program_points(sys.argv[1])
 
 if __name__ == "__main__":
     main()
