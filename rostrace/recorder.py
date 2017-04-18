@@ -43,31 +43,20 @@ Returns a tuple of lists, listing the names of the subscribers and publishers
 to a given topic, respectively.
 """
 def get_topic_publishers_and_subscribers(topic):
-    publishers = []
-    subscribers = []
-
     info = rostopic.get_info_text(topic)
     info = [l.strip() for l in info.splitlines()]
     assert info[0].startswith('Type:')
     assert info[2].startswith('Publishers:')
     info = info[3:]
 
-    # reads the name of a node from a given line
+    # find the line where the subscribers list begins
+    subscribers_at = info.index('Subscribers:')
+    assert subscribers_at != -1
+
+    # get a list of pubs and subs
     get_name = lambda l: l.split(' ')[1]
-
-
-
-    for l in info.splitlines():
-        if reached_pub and (not l or l.startswith('Subscribers:')):
-            break
-        elif reached_pub:
-            parts = l.split(' ')
-            if len(parts) < 3:
-                rospy.loginfo("Something is wrong here!")
-                continue
-            publishers.append(parts[2])
-        elif l.startswith('Publishers:'):
-            reached_pub = True
+    publishers = [get_name(pub) for pub in info[:subscribers_at-1]]
+    subscribers = [get_name(sub) for sub in info[subscribers_at:-1]]
 
     return (publishers, subscribers)
 
