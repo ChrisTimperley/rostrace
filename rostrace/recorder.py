@@ -10,23 +10,28 @@ Each message published to this topic describes the topics to which a given node
 is currently publishing.
 """
 def record_publishers():
+    # TODO: why queue_size=10? Surely queue_size=1 is more appropriate?
     pub = rospy.Publisher('rec/architecture_publishers', String, queue_size=10)
     rospy.init_node('architecture_publishers')
     rate = rospy.Rate(10) # 10 Hz (TODO: excessive?)
 
     previous_state = {}
-
     while not rospy.is_shutdown():
 
         # determine the state of the architecture
         # TODO: aren't unpublished topics just as interesting, if not more so?
         topics = rospy.get_published_topics()
-
+       
+        # get the current architecture state
         current_state = {}
-        for topic, typ in topics:
-            info = rostopic.get_info_text(topic)
-            (publishers, subscribers) = parse_rostopic_info(info)
-            new_publish[topic] = set(publishers)
+        for (topic, _) in topics:
+            (pubs, subs) = get_publishers_and_subscribers(topic)
+            current_state[topic] = {
+                'publishers': pubs,
+                'subscribers': subs
+            }
+
+        # find, and publish, any differences with the previous state
 
         if last_publish != new_publish:
             p = {}
@@ -39,10 +44,10 @@ def record_publishers():
         rate.sleep()
 
 """
-Returns a tuple of lists, listing the names of the subscribers and publishers
+Returns a tuple of sets, containing the names of the subscribers and publishers
 to a given topic, respectively.
 """
-def get_topic_publishers_and_subscribers(topic):
+def publishers_and_subscribers(topic):
     info = rostopic.get_info_text(topic)
     info = [l.strip() for l in info.splitlines()]
     assert info[0].startswith('Type:')
@@ -55,8 +60,8 @@ def get_topic_publishers_and_subscribers(topic):
 
     # get a list of pubs and subs
     get_name = lambda l: l.split(' ')[1]
-    publishers = [get_name(pub) for pub in info[:subscribers_at-1]]
-    subscribers = [get_name(sub) for sub in info[subscribers_at:-1]]
+    publishers = set(get_name(pub) for pub in info[:subscribers_at-1])
+    subscribers = set(get_name(sub) for sub in info[subscribers_at:-1])
 
     return (publishers, subscribers)
 
