@@ -42,28 +42,33 @@ def handle(server, service_name, proxy, req):
     params = {p: getattr(req, p) for p in req.__slots__}
 
     # send the request and wait for a response
-    ret = proxy(req)
+    success = False
+    try:
+        ret = proxy(req)
+        success = True
+        response = {p: getattr(ret, p) for p in ret.__slots__}
 
-    # generate a JSON-encodable description of the response
-    # TODO: may fail for more complex responses
-    response = {p: getattr(ret, p) for p in ret.__slots__}
-
-    # determine the response time
-    time_end = timer()
-    time_duration = time_end - time_start
+    except rospy.ServiceException, e:
+        success = False
+        response = {'reason': e} 
 
     # log the service call
-    log = {
-        'service': service_name,
-        'server': server,
-        'client': client,
-        'time_start': time_start,
-        'time_end': time_end,
-        'time_duration': time_duration,
-        'params': params,
-        'response': response
-    }
-    serviceCallPublisher.publish(json.dumps(log))
+    finally:
+        time_end = timer()
+        time_duration = time_end - time_start
+
+        log = {
+            'service': service_name,
+            'server': server,
+            'client': client,
+            'time_start': time_start,
+            'time_end': time_end,
+            'time_duration': time_duration,
+            'params': params,
+            'response': response,
+            'success': success
+        }
+        serviceCallPublisher.publish(json.dumps(log))
 
     return ret
 
