@@ -44,6 +44,10 @@ def handle(server, service_name, proxy, req):
     # send the request and wait for a response
     ret = proxy(req)
 
+    # generate a JSON-encodable description of the response
+    # TODO: may fail for more complex responses
+    response = {p: getattr(ret, p) for p in ret.__slots__}
+
     # determine the response time
     time_end = timer()
     time_duration = time_end - time_start
@@ -56,7 +60,8 @@ def handle(server, service_name, proxy, req):
         'time_start': time_start,
         'time_end': time_end,
         'time_duration': time_duration,
-        'params': params
+        'params': params,
+        'response': response
     }
     serviceCallPublisher.publish(json.dumps(log))
 
