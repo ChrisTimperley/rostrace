@@ -1,45 +1,26 @@
 #!/usr/bin/env python
 #
-# TODO: need to get the appropriate message format for the service
-#       - we could use some catkin and ROS to find it and dynamically
-#           import it
-#
 # Limitations:
 # - doesn't work if another node is using a persistent connection
-#
-# http://wiki.ros.org/ROS/Tutorials/WritingServiceClient%28python%29
 import rospy
 import std_srvs.srv
+import std_msgs.msg
 import rosgraph
 import rospy.core
 
 from rospy.impl.tcpros_base import TCPROSTransport
 
 """
+All (tapped) service calls are broadcast to the /rec/srvs topic in a JSON
+format
+"""
+ServiceCallPublisher = rospy.Publisher('/rec/srvs', std_msgs.msg.String)
+
+"""
 Acts a proxy, forwarding a given service call onto its intended recepient,
 whilst logging details of the service call to the appropriate topic
 """
-#def forward(forward_to, srv_format, request):
-    # wait for the service to become available
-#    rospy.wait_for_service(forward_to)
-#    try:
-#        # TODO: log the service call
-#
-#        # make the call
-#        proxy = rospy.ServiceProxy(forward_to, srv_format)
-#        response = proxy(request)
-#
-#        # TODO: log the response (and time taken)
-#
-#        # return the response
-#        return response
-#
-#    except rospy.ServiceException, e:
-#        print("Service call failed: {}".format(e))
-
-def handle(pub, proxy, req):
-    rospy.Publisher('/rec/srvs', std_msgs.msg.String)
-
+def handle(proxy, req):
     print("[poison]")
     ret = proxy(req)
     print("[/poison]")
@@ -71,7 +52,7 @@ def tap_service(service_name):
     proxy.transport.connect(dest_addr, dest_port, service_uri) 
 
     # create a new, tapped service, with the same name
-    rospy.Service('hello_world', std_srvs.srv.Empty, (lambda r: handle(pub, proxy, r)))
+    rospy.Service(service_name, service_msg_format, (lambda r: handle(proxy, r)))
 
 def tap_services(services):
     rospy.init_node('/service_tap')
