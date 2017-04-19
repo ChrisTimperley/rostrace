@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # See; http://docs.ros.org/kinetic/api/rosgraph/html/rosgraph.masterapi.Master-class.html#registerService
 import rospy
 import std_msgs.msg

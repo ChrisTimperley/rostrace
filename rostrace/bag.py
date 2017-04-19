@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import service
 import architecture
 import os
@@ -18,6 +17,3 @@ def record():
     except:
         if not p is None:
             os.killpg(p.pid, signal.SIGINT)
-
-if __name__ == "__main__":
-    record()
