@@ -18,6 +18,7 @@ iteration, publishes that state to /rec/arch. The architecture state is
 published as a JSON document.
 """
 def record():
+    print("Monitoring architecture...")
     master = rosgraph.Master("/rostrace")
     pub = rospy.Publisher('rec/arch', std_msgs.msg.String, queue_size=5)
     rate = rospy.Rate(0.2)
@@ -36,25 +37,3 @@ def record():
             previous_state = current_state
 
         rate.sleep()
-
-if __name__ == "__main__":
-    # register this node as /rostrace
-    rospy.init_node('rostrace')
-
-    # start recording publishers (in another thread)
-    record()
-
-    # start recording ROS bag
-    # TODO: for now, we record ALL topics
-    #       in the future, we should record specific topics
-#    cmd = "rosbag record -a"
-#    with Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, preexec_fn=preexecute, cwd=sandboxd) as p:
-#
-#        # TODO: listen out for bad return codes and errors
-#        try:
-#            p.communicate(timeout=tlim)
-#
-#        # TODO: be specific about what sort of exceptions we want to stop
-#        # recording
-#        except:
-#            os.killpg(p.pid, signal.SIGKILL)

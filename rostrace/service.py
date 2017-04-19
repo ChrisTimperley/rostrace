@@ -9,6 +9,7 @@
 #
 # http://docs.ros.org/diamondback/api/rosservice/html/index.html
 
+import sys
 import inspect
 import rospy
 import std_srvs.srv
@@ -80,6 +81,9 @@ Installs a tap on a given service, causing all activity on that service to be
 logged to the /rec/srvs topic.
 """
 def tap_service(service_name):
+    sys.stdout.write("\t{}...".format(service_name))
+    sys.stdout.flush()
+
     # block until the service is available
     rospy.wait_for_service(service_name)
 
@@ -97,7 +101,7 @@ def tap_service(service_name):
 
     # TODO: listen for failures
     # http://docs.ros.org/jade/api/rospy/html/rospy.impl.tcpros_service-pysrc.html#ServiceProxy
-    master = rosgraph.Master('service_tap')
+    master = rosgraph.Master('/roscore')
     service_uri = master.lookupService(proxy.resolved_name)
     (dest_addr, dest_port) = rospy.core.parse_rosrpc_uri(service_uri)
     proxy.transport = TCPROSTransport(proxy.protocol, proxy.resolved_name) 
@@ -108,11 +112,9 @@ def tap_service(service_name):
     tap = lambda r: handle(server, service_name, proxy, r)
     rospy.Service(service_name, service_cls, tap)
 
+    print(" OK")
+
 def tap_services(services):
-    rospy.init_node('service_tap')
+    print("Tapping services...")
     for service in services:
         tap_service(service)
-    rospy.spin()
-
-if __name__ == "__main__":
-    tap_services(['/hello_world'])

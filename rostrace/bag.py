@@ -9,6 +9,7 @@ import signal
 Records to a rosbag until an exception occurs
 """
 def record():
+    print("Recording to rosbag...")
     cmd = "rosbag record -a"
     p = None
     try:
