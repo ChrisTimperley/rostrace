@@ -37,9 +37,12 @@ def handle(server, service_name, proxy, req):
     time_start = timer()
     client = req._connection_header['callerid']
 
-    print("[poison]")
+    # generate a JSON-encodable description of the parameters for this request
+    # TODO: will fail with complex, embedded objects
+    params = {p: getattr(req, p) for p in req.__slots__}
+
+    # send the request and wait for a response
     ret = proxy(req)
-    print("[/poison]")
 
     # determine the response time
     time_end = timer()
@@ -52,7 +55,8 @@ def handle(server, service_name, proxy, req):
         'client': client,
         'time_start': time_start,
         'time_end': time_end,
-        'time_duration': time_duration
+        'time_duration': time_duration,
+        'params': params
     }
     serviceCallPublisher.publish(json.dumps(log))
 
