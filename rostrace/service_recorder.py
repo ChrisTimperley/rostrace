@@ -7,6 +7,10 @@
 # http://wiki.ros.org/ROS/Tutorials/WritingServiceClient%28python%29
 import rospy
 import std_srvs.srv
+import rosgraph
+import rospy.core
+
+from rospy.impl.tcpros_base import TCPROSTransport
 
 """
 Acts a proxy, forwarding a given service call onto its intended recepient,
@@ -37,14 +41,23 @@ def handle(proxy, req):
     return ret
 
 def server():
+    master = rosgraph.Master('/service_tap')
     rospy.init_node('service_tap')
 
     # create a proxy to the original service
     rospy.wait_for_service('hello_world')
     proxy = rospy.ServiceProxy('hello_world', std_srvs.srv.Empty, persistent=True)
 
-    # let's just try this?
-    proxy()
+    # create the transport for this proxy
+    # TODO: listen for failures
+    # http://docs.ros.org/jade/api/rospy/html/rospy.impl.tcpros_service-pysrc.html#ServiceProxy
+    service_uri = master.lookupService(proxy.resolved_name)
+    (dest_addr, dest_port) = rospy.core.parse_rosrpc_uri(service_uri)
+    proxy.transport = TCPROSTransport(proxy.protocol, proxy.resolved_name) 
+    proxy.transport.buff_size = proxy.buff_size
+    proxy.transport.connect(dest_addr, dest_port, service_uri) 
+
+    # TODO: remember to close the connection!
 
     # create a new service
     rospy.Service('hello_world', std_srvs.srv.Empty, (lambda r: handle(proxy, r)))
