@@ -127,6 +127,7 @@ def get_message_format(msg):
 
     # Extract each of the fields from the std. out
     prefix = []
+    skip_till_depth = None
     for line in out.splitlines():
         line = line.rstrip()
 
@@ -140,22 +141,25 @@ def get_message_format(msg):
 
         # Get the name and type for this field
         (typ, suffix) = line.lstrip().split(' ')
-
-        # Generate the fully qualified name for the field and record it
         name = '.'.join(prefix + [suffix])
-        fields[name] = typ
-
-        # Add to the prefix stack
         prefix.append(suffix)
 
-    # Map each ROS type to a Daikon type
-    # If no such mapping exists for a given field, drop that field
-    fields_mapped = {}
-    for (field, typ) in fields.items():
+        # If the an ancestor of this field was an array type, skip this field
+        if not skip_till_depth is None:
+            if depth == skip_till_depth:
+                skip_till_depth = None
+            else:
+                continue
+
+        # Find the Daikon type for the ROS type
+        # - record, if there is a mapping
+        # - ignore all descendants, if there is no mapping and is array type
+        # - otherwise, skip this field, but not necessarily its descendants
         typ = re.sub(r"\[\d+\]", '[]', typ)
         if typ in TYPE_MAP:
-            fields_mapped[field] = TYPE_MAP[typ]
-    fields = fields_mapped
+            fields[name] = TYPE_MAP[typ]
+        elif '[]' in typ:
+            skip_till_depth = depth
 
     return fields
 
@@ -210,17 +214,16 @@ def convert_bag_to_program_points(filename):
 
         # Fetch the message formats used by each of those topics
         topic_formats = {t: get_message_format_for_topic(t) for t in topics}
-        pp(topic_formats)
 
-        #for entry in bag:
-        #    var_vals = extract_vars_from_message(entry.topic, entry.message)
-        #
-        #    sys.exit(0)
-
-        # pp(var_vals)
+        # Read all messages published to topics of interest
+        for msg in bag.read_messages(topics=topics):
+            msg_fmt = topic_formats[msg.topic]
+            vrs = extract_vars_from_message(msg.topic, msg.message, msg_fmt)
+            pp(vrs)
 
 def main(): 
-    convert_bag_to_program_points(sys.argv[1])
+    pp(get_message_format("dynamic_reconfigure/ConfigDescription"))
+    # convert_bag_to_program_points(sys.argv[1])
 
 if __name__ == "__main__":
     main()

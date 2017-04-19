@@ -1,6 +1,10 @@
 #!/usr/bin/python3
+#
+#
 import rospy
 import rostopic
+
+from subprocess import Popen, devnull
 
 """
 This function is responsible for implementing a ROS node which periodically
@@ -32,7 +36,7 @@ def record_publishers():
             }
 
         # find, and publish, any differences with the previous state
-
+        # TODO
         if last_publish != new_publish:
             p = {}
             for topic in new_publish.keys():
@@ -66,3 +70,21 @@ def publishers_and_subscribers(topic):
     return (publishers, subscribers)
 
 if __name__ == "__main__":
+
+    # start recording publishers (in another thread)
+    record_publishers()
+
+    # start recording ROS bag
+    # TODO: for now, we record ALL topics
+    #       in the future, we should record specific topics
+    cmd = "rosbag record -a"
+    with Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, preexec_fn=preexecute, cwd=sandboxd) as p:
+
+        # TODO: listen out for bad return codes and errors
+        try:
+            p.communicate(timeout=tlim)
+
+        # TODO: be specific about what sort of exceptions we want to stop
+        # recording
+        except:
+            os.killpg(p.pid, signal.SIGKILL)
