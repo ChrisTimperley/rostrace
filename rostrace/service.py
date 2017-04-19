@@ -4,6 +4,9 @@
 # - doesn't work if another node is using a persistent connection
 # - all names MUST be fully qualified, else rosservice will fail
 #
+# TODO:
+# - remap services back to their original versions on exit
+#
 # http://docs.ros.org/diamondback/api/rosservice/html/index.html
 
 import inspect
