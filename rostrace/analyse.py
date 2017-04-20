@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+#
+#
+#
+# Possible questions:
+# - if X is present, what other nodes must be present?
+# - if A is subscribe to T, B must publish to T {S(A,T) => P(B,T)}
+#
 import sys
 import json
 import rosbag
