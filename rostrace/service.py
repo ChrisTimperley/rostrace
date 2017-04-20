@@ -82,7 +82,7 @@ class ServiceTapper(object):
     Listens to all activity on a given service
     """
     def listen_to(self, service_name):
-        print("\t tapping - {}...".format(service_name))
+        rospy.loginfo("Tapping service: {}".format(service_name))
 
         # block until the service is available
         rospy.wait_for_service(service_name)
@@ -114,7 +114,7 @@ class ServiceTapper(object):
         tap = lambda r: self.__handler(server, service_name, proxy, r)
         rospy.Service(service_name, service_cls, tap)
 
-        print("\t tapped - {}...".format(service_name))
+        rospy.loginfo("Tapped service: {}".format(service_name))
 
 
     """
