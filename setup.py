@@ -1,14 +1,14 @@
-#!/usr/bin/python2.7
+#!/usr/bin/env python
 from setuptools import setup
 
 setup(
     name='rostrace',
-    version='0.0.1',
-    description='Converts ROS bag files into Daikon traces and declarations',
+    version='2.0.1',
+    description='Allows detailed logging and debugging of running ROS systems',
     long_description='TBA',
     # need to modify to have multiple authors!
-    author='Afsoon Afsal, Chris Timperley',
-    author_email='afsafzal@cs.cmu.edu, christimperley@gmail.com',
+    author='Chris Timperley, Afsoon Afsal',
+    author_email='christimperley@gmail.com, afsafzal@cs.cmu.edu',
     # TODO: move to Squares organisation
     url='https://github.com/ChrisTimperley/rostrace',
     license='mit',

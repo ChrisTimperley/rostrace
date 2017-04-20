@@ -2,9 +2,12 @@
 import thread
 import rospy
 
+import os
+import subprocess
+import signal
+
 import service
 import architecture
-import bag
 
 def trace():
     rospy.init_node('rostrace')
@@ -15,13 +18,22 @@ def trace():
     service.tap_services(services)
 
     # setup architecture monitoring
-    thread.start_new_thread(architecture.record, ())
+    try:
+        thread.start_new_thread(architecture.record, ())
 
-    # use semaphore to communicate status of architecture
-    # log to bag file
-    thread.start_new_thread(bag.record, ())
+        # use semaphore to communicate status of architecture
+        # log to bag file
+        p_recorder = subprocess.Popen("rosbag record -a", preexec_fn=os.setsid, shell=True)
+        print("Recording to rosbag...")
+        thread.start_new_thread(p_recorder.communicate, ())
 
-    rospy.spin()
+        # spin!
+        rospy.spin()
 
-if __name__ == "__main__":
+    # safely stop recording
+    finally:
+        os.killpg(p_recorder.pid, signal.SIGINT)
+
+
+def main():
     trace()

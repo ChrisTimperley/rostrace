@@ -1,0 +1,15 @@
+How do we generate program points?
+
+* distributed state invariants
+
+What is state?
+
+* architecture
+* certain topic broadcasts
+
+
+
+What would be interesting?
+
+* why was parameter X changed?
+* 
