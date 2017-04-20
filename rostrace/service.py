@@ -82,8 +82,7 @@ class ServiceTapper(object):
     Listens to all activity on a given service
     """
     def listen_to(self, service_name):
-        sys.stdout.write("\t{}...".format(service_name))
-        sys.stdout.flush()
+        print("\t tapping - {}...".format(service_name))
 
         # block until the service is available
         rospy.wait_for_service(service_name)
@@ -115,16 +114,21 @@ class ServiceTapper(object):
         tap = lambda r: self.__handler(server, service_name, proxy, r)
         rospy.Service(service_name, service_cls, tap)
 
-        print(" OK")
+        print("\t tapped - {}...".format(service_name))
 
 
     """
     Listens to all activity on all specified services
     """
     def listen(self, services):
-        print("Tapping services...")
-        for service in services:
+        rospy.loginfo("Tapping services...")
+        services = rosservice.get_service_list(include_nodes=True)
+        for (service, node) in services:
+            # ignore irrelevant services
+            if node == 'rostrace' or service.endswith('/get_loggers') or service.endswith('/set_logger_level'):
+                continue
             self.listen_to(service)
+        rospy.loginfo("Tapped services")
 
 
     """
@@ -132,11 +136,12 @@ class ServiceTapper(object):
     the program is closed, otherwise those services will become unavailable.
     """
     def restore(self):
-        print("Restoring services...")
+        rospy.loginfo("Restoring services...")
         for (service_name, uri) in self.tapped.items():
-            print("\t{}".format(service_name))
+            rospy.loginfo("Restoring service: {}".format(service_name))
             self.master.registerService(service_name, uri, uri)
-        print("Restored services")
+            rospy.loginfo("Restored service: {}".format(service_name))
+        rospy.loginfo("Restored services")
 
 
     """
