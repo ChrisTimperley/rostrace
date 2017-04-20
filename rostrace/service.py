@@ -5,7 +5,8 @@
 # - all names MUST be fully qualified, else rosservice will fail
 #
 # TODO:
-# - listen to all services
+# - watch out for new services and tap them when they come online
+# - stop broadcasting a service when the original host dies?
 #
 # http://docs.ros.org/diamondback/api/rosservice/html/index.html
 
