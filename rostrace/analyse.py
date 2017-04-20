@@ -6,6 +6,8 @@
 # - if X is present, what other nodes must be present?
 # - if A is subscribe to T, B must publish to T {S(A,T) => P(B,T)}
 #
+#
+# Do we want to think about Gazebo-based service calls?
 import sys
 import json
 import rosbag
