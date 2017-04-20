@@ -17,6 +17,7 @@ def trace():
     rospy.init_node('rostrace')
 
     services = ['/hello_world']
+    service_tap = service.ServiceTapper()
 
     try:
         # use semaphore to communicate status of architecture
@@ -31,7 +32,7 @@ def trace():
 
         # setup service re-direction
         # blocks until all services are redirected
-        service.tap_services(services)
+        service_tap.listen(services)
 
         # spin!
         rospy.spin()
@@ -39,7 +40,7 @@ def trace():
     # safely stop recording and restore original services
     finally:
         os.killpg(p_recorder.pid, signal.SIGINT)
-        service.restore_services(services)
+        service_tap.restore()
 
 
 def main():
