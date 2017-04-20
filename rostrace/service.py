@@ -26,6 +26,11 @@ from rospy.impl.tcpros_base import TCPROSTransport
 # we use the most accurate timer available to the system
 from timeit import default_timer as timer
 
+# FOR NOW
+TAPPED_SERVICES = {}
+
+MASTER = rosgraph.Master('/roscore')
+
 """
 All (tapped) service calls are broadcast to the /rec/srvs topic in a JSON
 format. The +queue_size+ parameter creates an asynchronous publisher, which
@@ -101,12 +106,14 @@ def tap_service(service_name):
 
     # TODO: listen for failures
     # http://docs.ros.org/jade/api/rospy/html/rospy.impl.tcpros_service-pysrc.html#ServiceProxy
-    master = rosgraph.Master('/roscore')
+    master = MASTER
     service_uri = master.lookupService(proxy.resolved_name)
     (dest_addr, dest_port) = rospy.core.parse_rosrpc_uri(service_uri)
     proxy.transport = TCPROSTransport(proxy.protocol, proxy.resolved_name) 
     proxy.transport.buff_size = proxy.buff_size
     proxy.transport.connect(dest_addr, dest_port, service_uri) 
+
+    TAPPED_SERVICES[service_name] = service_uri
 
     # create a new, tapped service, with the same name
     tap = lambda r: handle(server, service_name, proxy, r)
@@ -118,3 +125,10 @@ def tap_services(services):
     print("Tapping services...")
     for service in services:
         tap_service(service)
+
+def restore_services(services):
+    print("Restoring services...")
+    for (service_name, uri) in TAPPED_SERVICES.items():
+        print("\t{}".format(service_name))
+        MASTER.registerService(service_name, uri, uri)
+    print("Restored services")
