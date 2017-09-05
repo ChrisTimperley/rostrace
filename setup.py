@@ -7,8 +7,8 @@ setup(
     description='Allows detailed logging and debugging of running ROS systems',
     long_description='TBA',
     # need to modify to have multiple authors!
-    author='Chris Timperley, Afsoon Afsal',
-    author_email='christimperley@gmail.com, afsafzal@cs.cmu.edu',
+    author='Chris Timperley, Afsoon Afzal',
+    author_email='christimperley@gmail.com, afsoona@cs.cmu.edu',
     # TODO: move to Squares organisation
     url='https://github.com/ChrisTimperley/rostrace',
     license='mit',
